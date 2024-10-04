@@ -1,0 +1,27 @@
+@implements IDisposable
+
+<h4 style="color: @Color">Current time: @_currentTime.ToLongTimeString()</h4>
+
+@code {
+    [Parameter]
+    public string Color { get; set; }
+    
+    private Timer _timer;
+    private DateTime _currentTime = DateTime.Now;
+
+    protected override void OnInitialized()
+    {
+        _timer = new Timer(HandleTimerFire, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+    }
+
+    private void HandleTimerFire(object state)
+    {
+        _currentTime = DateTime.Now;
+        StateHasChanged();
+    }
+    
+    public void Dispose()
+    {
+        _timer.Dispose();
+    }
+}

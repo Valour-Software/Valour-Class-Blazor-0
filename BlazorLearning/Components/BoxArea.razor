@@ -1,0 +1,50 @@
+@using BlazorLearning.Utility
+@inject IJSRuntime JsRuntime
+
+<div
+    @ref="@_ref"
+    @onmousemove="@HandleMouseMove"
+    class="box-area"
+    style="width: @(WidthPx)px; height: @(HeightPx)px"
+>
+    @ChildContent
+</div>
+
+@code {
+
+    private ElementReference _ref;
+    
+    [Parameter] 
+    public int WidthPx { get; set; } = 500;
+
+    [Parameter] 
+    public int HeightPx { get; set; } = 500;
+    
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    private ElementPosition _position;
+
+    private IJSObjectReference _jsModule;
+
+    private void HandleMouseMove(MouseEventArgs e)
+    {
+        Console.WriteLine($"x:{e.ClientX - _position.ClientX} y:{e.ClientY - _position.ClientY}");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _jsModule = await JsRuntime.
+                InvokeAsync<IJSObjectReference>(
+                    "import", 
+                    "./Components/BoxArea.razor.js"
+                );
+
+            _position = await _jsModule.InvokeAsync<ElementPosition>("getPosition", _ref);
+            Console.WriteLine($"Position: x {_position.ClientX} y {_position.ClientY}");
+        }
+    }
+
+}

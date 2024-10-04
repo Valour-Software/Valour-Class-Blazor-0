@@ -1,0 +1,47 @@
+<div
+    @onclick="@HandleClick"
+    role="button"
+    class="square"
+    style="background-color: @Color">
+</div>
+
+@code {
+    private float _hue = 0;
+    private string Color => $"hsl({_hue}deg, 100%, 50%)";
+
+    private Timer _timer;
+
+    private void SetupTimer()
+    {
+        _timer = new Timer(
+            HandleTimerFire,
+            null,
+            TimeSpan.FromMilliseconds(100),
+            TimeSpan.FromMilliseconds(100)
+        );
+    }
+
+    private void DestroyTimer()
+    {
+        _timer.Dispose();
+        _timer = null;
+    }
+
+    private void HandleTimerFire(object state)
+    {
+        _hue += 1f;
+        StateHasChanged();
+    }
+
+    private void HandleClick()
+    {
+        if (_timer is null)
+        {
+            SetupTimer();
+        }
+        else
+        {
+            DestroyTimer();
+        }
+    }
+}

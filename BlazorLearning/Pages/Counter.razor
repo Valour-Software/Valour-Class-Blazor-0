@@ -1,0 +1,38 @@
+﻿@page "/counter"
+
+<Clock Color="red" />
+<Clock Color="blue" />
+<Clock Color="green" />
+
+<PageTitle>User Count</PageTitle>
+
+@if (string.IsNullOrEmpty(_responseString))
+{
+    <h4>Loading...</h4>
+}
+else
+{
+    <h4>Current count: @_responseString</h4>   
+}
+
+<button class='btn' @onclick='@HandleUpdateClick'>Update</button>
+
+@code {
+    private string _responseString;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UpdateCount();
+    }
+
+    private async Task HandleUpdateClick()
+    {
+        await UpdateCount();
+    }
+
+    private async Task UpdateCount()
+    {
+        var client = new HttpClient();
+        _responseString = await client.GetStringAsync("https://app.valour.gg/api/users/count");
+    }
+}
