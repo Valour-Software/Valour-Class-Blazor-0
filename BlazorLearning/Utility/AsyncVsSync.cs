@@ -2,6 +2,11 @@ namespace BlazorLearning.Utility;
 
 public class AsyncVsSync
 {
+    public void DoThing(Action action)
+    {
+        
+    }
+    
     public async Task MakeACakeAsync()
     {
         var tasks = new List<Task>()

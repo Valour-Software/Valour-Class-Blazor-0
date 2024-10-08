@@ -16,12 +16,19 @@
     private float _hueDegrees = 0;
     private string ColorStyle => $"background-color: hsl({_hueDegrees}deg, 100%, 50%);";
 
-    private Timer _timer;
+    private Timer _colorTimer;
+    private Timer _physicsTimer;
     
     private string PositionStyle => $"left: {_posX}px; top: {_posY}px;";
     
     private float _posX = 0f;
     private float _posY = 0f;
+    
+    private float _velX = 0f;
+    private float _velY = 0f;
+
+    const float Gravity = 1f;
+    const int SquareSize = 100;
 
     /// <summary>
     /// True if the user is currently dragging the square.
@@ -31,11 +38,18 @@
     protected override void OnInitialized()
     {
         BoxArea.OnMouseUp += HandleMouseUp;
+        
+        _physicsTimer = new Timer(
+            HandlePhysicsTimerFire,
+            null,
+            TimeSpan.FromMilliseconds(20),
+            TimeSpan.FromMilliseconds(20)
+        );
     }
 
     private void SetupTimer()
     {
-        _timer = new Timer(
+        _colorTimer = new Timer(
             HandleTimerFire,
             null,
             TimeSpan.FromMilliseconds(100),
@@ -45,8 +59,8 @@
 
     private void DestroyTimer()
     {
-        _timer.Dispose();
-        _timer = null;
+        _colorTimer.Dispose();
+        _colorTimer = null;
     }
 
     private void HandleTimerFire(object state)
@@ -57,7 +71,7 @@
 
     private void HandleClick()
     {
-        if (_timer is null)
+        if (_colorTimer is null)
         {
             SetupTimer();
         }
@@ -86,14 +100,92 @@
         StateHasChanged();
     }
 
-    private async Task HandleMouseUp()
+    private async Task HandleMouseUp(MouseEventArgs e)
     {
         _isDragging = false;
         BoxArea.OnMouseMove -= HandleMouseMove;
+        
+        _velX += BoxArea.MouseVelX  * 2f;
+        _velY -= BoxArea.MouseVelY * 2f;
     }
 
     public void Dispose()
     {
         BoxArea.OnMouseUp -= HandleMouseUp;
+    }
+
+    public struct CollisionState
+    {
+        public bool CollidedX;
+        public bool CollidedY;
+    }
+    
+    // Physics //
+    private bool _lastCollide = false;
+    private void HandlePhysicsTimerFire(object state)
+    {
+        if (_isDragging)
+            return;
+        
+        _velY -= Gravity;
+        
+        _posX += _velX;
+        _posY -= _velY;
+
+        var cState = CheckCollisions();
+        if (cState.CollidedX)
+        {
+            _velX *= -0.8f;
+        }
+        if (cState.CollidedY)
+        {
+            _velY *= -0.8f;
+        }
+
+        if (!_lastCollide && (cState.CollidedX || cState.CollidedY))
+        {
+            BoxArea.PlayBounceSound();    
+        }
+        
+        _lastCollide = cState.CollidedX || cState.CollidedY;
+        
+        StateHasChanged();
+    }
+
+    private CollisionState CheckCollisions()
+    {
+        var worldHeight = BoxArea.HeightPx;
+        var worldWidth = BoxArea.WidthPx;
+        
+        bool collidedX = false;
+        bool collidedY = false;
+
+        if (_posX < 0)
+        {
+            _posX = 0;
+            collidedX = true;
+        }  
+        else if (_posX > worldWidth - SquareSize)
+        {
+            _posX = worldWidth - SquareSize;
+            collidedX = true;
+        }
+
+        if (_posY < 0)
+        {
+            _posY = 0;
+            collidedY = true;
+        } 
+        else if (_posY > worldHeight - SquareSize)
+        {
+            _posY = worldHeight - SquareSize;
+            collidedY = true;
+        }
+
+        return new CollisionState()
+        {
+            CollidedX = collidedX,
+            CollidedY = collidedY
+        };
     }
 }

@@ -10,3 +10,8 @@ export const getPosition = (element: HTMLElement): ElementPosition => {
         clientY: bounds.top
     };
 };
+
+export const playBounceSound = async () => {
+    const audio = new Audio('bounce.mp3');
+    await audio.play();
+};
