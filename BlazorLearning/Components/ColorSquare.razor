@@ -1,15 +1,37 @@
+@implements IDisposable
+
 <div
+    @onmousedown="@HandleMouseDown"
     @onclick="@HandleClick"
     role="button"
     class="square"
-    style="background-color: @Color">
+    style="position: absolute; @ColorStyle @PositionStyle">
 </div>
 
 @code {
-    private float _hue = 0;
-    private string Color => $"hsl({_hue}deg, 100%, 50%)";
+    
+    [CascadingParameter]
+    public BoxArea BoxArea { get; set; }
+    
+    private float _hueDegrees = 0;
+    private string ColorStyle => $"background-color: hsl({_hueDegrees}deg, 100%, 50%);";
 
     private Timer _timer;
+    
+    private string PositionStyle => $"left: {_posX}px; top: {_posY}px;";
+    
+    private float _posX = 0f;
+    private float _posY = 0f;
+
+    /// <summary>
+    /// True if the user is currently dragging the square.
+    /// </summary>
+    private bool _isDragging = false;
+
+    protected override void OnInitialized()
+    {
+        BoxArea.OnMouseUp += HandleMouseUp;
+    }
 
     private void SetupTimer()
     {
@@ -29,7 +51,7 @@
 
     private void HandleTimerFire(object state)
     {
-        _hue += 1f;
+        _hueDegrees += 1f;
         StateHasChanged();
     }
 
@@ -43,5 +65,35 @@
         {
             DestroyTimer();
         }
+    }
+
+    private void HandleMouseDown()
+    {
+        _isDragging = true;
+        BoxArea.OnMouseMove += HandleMouseMove;
+    }
+
+    private async Task HandleMouseMove(MouseEventArgs e)
+    {
+        if (!_isDragging)
+        {
+            return;
+        }
+
+        _posX += (float)e.MovementX;
+        _posY += (float)e.MovementY;
+        
+        StateHasChanged();
+    }
+
+    private async Task HandleMouseUp()
+    {
+        _isDragging = false;
+        BoxArea.OnMouseMove -= HandleMouseMove;
+    }
+
+    public void Dispose()
+    {
+        BoxArea.OnMouseUp -= HandleMouseUp;
     }
 }

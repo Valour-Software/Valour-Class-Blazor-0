@@ -1,16 +1,21 @@
 @using BlazorLearning.Utility
 @inject IJSRuntime JsRuntime
 
-<div
-    @ref="@_ref"
-    @onmousemove="@HandleMouseMove"
-    class="box-area"
-    style="width: @(WidthPx)px; height: @(HeightPx)px"
->
-    @ChildContent
-</div>
+<CascadingValue Value="@this">
+    <div
+        @ref="@_ref"
+        @onmousemove="@HandleMouseMove"
+        @onmouseup="@HandleMouseUp"
+        class="box-area"
+        style="position: relative; width: @(WidthPx)px; height: @(HeightPx)px"
+    >
+        @ChildContent
+    </div>
+</CascadingValue>
 
 @code {
+    public event Func<Task> OnMouseUp;
+    public event Func<MouseEventArgs, Task> OnMouseMove; 
 
     private ElementReference _ref;
     
@@ -27,9 +32,18 @@
 
     private IJSObjectReference _jsModule;
 
-    private void HandleMouseMove(MouseEventArgs e)
+    private async Task HandleMouseMove(MouseEventArgs e)
     {
-        Console.WriteLine($"x:{e.ClientX - _position.ClientX} y:{e.ClientY - _position.ClientY}");
+        // Console.WriteLine($"x:{e.ClientX - _position.ClientX} y:{e.ClientY - _position.ClientY}");
+        
+        if (OnMouseMove is not null)
+            await OnMouseMove.Invoke(e);
+    }
+    
+    private async Task HandleMouseUp()
+    {
+        if (OnMouseUp is not null)
+            await OnMouseUp.Invoke();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -43,7 +57,7 @@
                 );
 
             _position = await _jsModule.InvokeAsync<ElementPosition>("getPosition", _ref);
-            Console.WriteLine($"Position: x {_position.ClientX} y {_position.ClientY}");
+            // Console.WriteLine($"Position: x {_position.ClientX} y {_position.ClientY}");
         }
     }
 
