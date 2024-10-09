@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorLearning", "BlazorLearning\BlazorLearning.csproj", "{9AC993EB-9AC3-46BB-95E1-B06AAB982AE2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorLearning.Server", "BlazorLearning.Server\BlazorLearning.Server.csproj", "{58BD65D1-9657-4B75-A9F7-C5E9D6D050C5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{9AC993EB-9AC3-46BB-95E1-B06AAB982AE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9AC993EB-9AC3-46BB-95E1-B06AAB982AE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9AC993EB-9AC3-46BB-95E1-B06AAB982AE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58BD65D1-9657-4B75-A9F7-C5E9D6D050C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58BD65D1-9657-4B75-A9F7-C5E9D6D050C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58BD65D1-9657-4B75-A9F7-C5E9D6D050C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58BD65D1-9657-4B75-A9F7-C5E9D6D050C5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

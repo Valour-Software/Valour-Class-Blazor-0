@@ -1,5 +1,22 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.SignalR.Client
 
 <BoxArea>
     <ColorSquare />
 </BoxArea>
+
+@code {
+
+    const string HubUrl = "https://localhost:7259/hub";
+    public HubConnection Hub { get; set; }
+    
+    protected override void OnInitialized()
+    {
+        Hub = new HubConnectionBuilder()
+            .WithUrl(HubUrl)
+            .Build();
+
+        Hub.StartAsync();
+    }
+
+}
