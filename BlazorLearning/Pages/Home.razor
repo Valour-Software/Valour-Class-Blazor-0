@@ -7,16 +7,12 @@
 
 @code {
 
-    const string HubUrl = "https://localhost:7259/hub";
-    public HubConnection Hub { get; set; }
-    
-    protected override void OnInitialized()
-    {
-        Hub = new HubConnectionBuilder()
-            .WithUrl(HubUrl)
-            .Build();
+    private CoreHub _coreHub;
 
-        Hub.StartAsync();
+    protected async override Task OnInitializedAsync()
+    {
+        _coreHub = new CoreHub();
+        await _coreHub.InitAsync();
     }
 
 }
