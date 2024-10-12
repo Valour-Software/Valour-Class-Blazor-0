@@ -1,3 +1,4 @@
+@using Microsoft.AspNetCore.SignalR.Client
 @implements IDisposable
 
 <div
@@ -24,6 +25,8 @@
 
     private Timer _colorTimer;
     private Timer _physicsTimer;
+
+    private Timer _networkTimer;
     
     private string PositionStyle => $"left: {_posX}px; top: {_posY}px;";
     
@@ -45,6 +48,13 @@
     {
         if (Id != CoreHub.Id)
             return;
+
+        _networkTimer = new Timer(
+            HandleNetworkTimerFire,
+            null,
+            TimeSpan.FromMilliseconds(100),
+            TimeSpan.FromMilliseconds(100)
+        );
         
         BoxArea.OnMouseUp += HandleMouseUp;
         
@@ -213,5 +223,10 @@
         _posY = y;
         
         StateHasChanged();
+    }
+
+    private async void HandleNetworkTimerFire(object state)
+    {
+        await CoreHub.Hub.InvokeAsync("SendBallPosition", _posX, _posY);
     }
 }

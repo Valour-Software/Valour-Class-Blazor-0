@@ -15,6 +15,13 @@ public class CoreHub : Hub
         
         // Sent out to all clients
         Clients.All.SendAsync("NotifyConnection", Context.ConnectionId);
-        Clients.Client(Context.ConnectionId).SendAsync("Setup", Context.ConnectionId, ConnectionIds);
+        Clients.Client(Context.ConnectionId)
+            .SendAsync("Setup", Context.ConnectionId, ConnectionIds);
+    }
+
+    public async Task SendBallPosition(int posX, int posY)
+    {
+        await Clients.AllExcept(Context.ConnectionId)
+            .SendAsync("BallPosition", posX, posY, Context.ConnectionId);
     }
 }

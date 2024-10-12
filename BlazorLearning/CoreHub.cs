@@ -39,6 +39,13 @@ public class CoreHub
                 SetupCompleted.Invoke();
         });
 
+        Hub.On<int, int, string>("BallPosition", (int posX, int posY, string id) =>
+        {
+            var client = ConnectedClients.FirstOrDefault(x => x.Id == id);
+            if (client is not null)
+                client.Square.SetPosition(posX, posY);
+        });
+
         await Hub.StartAsync();
 
         while (Hub.State != HubConnectionState.Connected)
