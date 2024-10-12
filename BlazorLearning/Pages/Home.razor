@@ -1,18 +1,28 @@
 ﻿@page "/"
-@using Microsoft.AspNetCore.SignalR.Client
+
+@if (CoreHub?.ConnectedClients is null)
+{
+    <h3>Connecting...</h3>
+    return;
+}
 
 <BoxArea>
-    <ColorSquare />
+    @foreach (var clientData in CoreHub.ConnectedClients)
+    {
+        <ColorSquare @ref="@clientData.Square" Id="@clientData.Id" @key="@clientData.Id" CoreHub="@CoreHub" />
+    }
 </BoxArea>
 
 @code {
 
-    private CoreHub _coreHub;
+    public CoreHub CoreHub;
 
     protected async override Task OnInitializedAsync()
     {
-        _coreHub = new CoreHub();
-        await _coreHub.InitAsync();
+        CoreHub = new CoreHub();
+        CoreHub.SetupCompleted += StateHasChanged;
+        CoreHub.ConnectionAdded += StateHasChanged;
+        await CoreHub.InitAsync();
     }
 
 }
