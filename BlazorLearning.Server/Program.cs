@@ -7,7 +7,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(s =>
+{
+    // s.SupportedProtocols = ["HTTP", "JSON"];
+});
 
 builder.Services.AddCors();
 
@@ -21,7 +24,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.Urls.Add("http://0.0.0.0:5000");
-app.Urls.Add("https://0.0.0.0:5001");
 
 app.UseCors(x =>
 {
@@ -30,7 +32,7 @@ app.UseCors(x =>
     x.AllowAnyMethod();
 });
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
 app.MapHub<CoreHub>("/hub");
 

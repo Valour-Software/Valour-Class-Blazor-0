@@ -5,7 +5,7 @@ namespace BlazorLearning;
 
 public class CoreHub
 {
-    const string HubUrl = "https://localhost:5001/hub";
+    const string HubUrl = "http://192.168.0.226:5000/hub";
     public HubConnection Hub { get; set; }
     public event Action SetupCompleted;
     public event Action ConnectionAdded;
