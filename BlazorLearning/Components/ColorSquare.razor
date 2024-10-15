@@ -227,6 +227,9 @@
 
     private async void HandleNetworkTimerFire(object state)
     {
+        if (CoreHub.Hub.State != HubConnectionState.Connected)
+            return;
+        
         await CoreHub.Hub.InvokeAsync("SendBallPosition", _posX, _posY);
     }
 }

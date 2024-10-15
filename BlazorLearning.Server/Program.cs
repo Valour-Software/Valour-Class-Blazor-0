@@ -20,6 +20,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.Urls.Add("http://0.0.0.0:5000");
+app.Urls.Add("https://0.0.0.0:5001");
+
 app.UseCors(x =>
 {
     x.AllowAnyHeader();
