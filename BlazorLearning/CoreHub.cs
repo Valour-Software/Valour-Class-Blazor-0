@@ -1,3 +1,4 @@
+using System.Text.Json;
 using BlazorLearning.Components;
 using Microsoft.AspNetCore.SignalR.Client;
 
@@ -8,7 +9,7 @@ public class CoreHub
     const string HubUrl = "http://192.168.0.226:5000/hub";
     public HubConnection Hub { get; set; }
     public event Action SetupCompleted;
-    public event Action ConnectionAdded;
+    public event Action ConnectionChange;
     
     public string Id { get; set; }
 
@@ -26,8 +27,8 @@ public class CoreHub
             if (!ConnectedClients.Any(x => x.Id == id))
                 ConnectedClients.Add(new ClientData(){ Id = id });
             
-            if (ConnectionAdded is not null)
-                ConnectionAdded.Invoke();
+            if (ConnectionChange is not null)
+                ConnectionChange.Invoke();
         });
 
         Hub.On<string, List<string>>("Setup", (string id, List<string> connections) =>
@@ -35,15 +36,28 @@ public class CoreHub
             Id = id;
             ConnectedClients.AddRange(connections.Select(x => new ClientData(){ Id = x }));
             
+            Console.WriteLine("Connections: " + JsonSerializer.Serialize(connections));
+            
             if (SetupCompleted is not null)
                 SetupCompleted.Invoke();
         });
 
-        Hub.On<int, int, string>("BallPosition", (int posX, int posY, string id) =>
+        Hub.On("ReceiveBallData", (float posX, float posY, float velX, float velY, float hueDegrees, DateTime time, string id) =>
         {
             var client = ConnectedClients.FirstOrDefault(x => x.Id == id);
             if (client is not null)
-                client.Square.SetPosition(posX, posY);
+                client.Square.SetData(posX, posY, velX, velY, hueDegrees, time);
+            
+            Console.WriteLine($"Position updated for {id} to {posX}, {posY}");
+        });
+        
+        Hub.On("NotifyDisconnection", (string id) =>
+        {
+            Console.WriteLine($"{id} has disconnected!");
+            ConnectedClients.RemoveAll(x => x.Id == id);
+            
+            if (ConnectionChange is not null)
+                ConnectionChange.Invoke();
         });
 
         await Hub.StartAsync();

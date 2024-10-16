@@ -21,7 +21,7 @@
     {
         CoreHub = new CoreHub();
         CoreHub.SetupCompleted += StateHasChanged;
-        CoreHub.ConnectionAdded += StateHasChanged;
+        CoreHub.ConnectionChange += StateHasChanged;
         await CoreHub.InitAsync();
     }
 

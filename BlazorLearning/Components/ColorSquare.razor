@@ -26,7 +26,9 @@
     private Timer _colorTimer;
     private Timer _physicsTimer;
 
-    private Timer _networkTimer;
+    private DateTime _lastNetworkUpdate = DateTime.Now;
+    
+    private DateTime _lastReceived = DateTime.Now;
     
     private string PositionStyle => $"left: {_posX}px; top: {_posY}px;";
     
@@ -46,24 +48,17 @@
 
     protected override void OnInitialized()
     {
-        if (Id != CoreHub.Id)
-            return;
-
-        _networkTimer = new Timer(
-            HandleNetworkTimerFire,
-            null,
-            TimeSpan.FromMilliseconds(100),
-            TimeSpan.FromMilliseconds(100)
-        );
-        
-        BoxArea.OnMouseUp += HandleMouseUp;
-        
         _physicsTimer = new Timer(
             HandlePhysicsTimerFire,
             null,
             TimeSpan.FromMilliseconds(20),
             TimeSpan.FromMilliseconds(20)
         );
+        
+        if (Id != CoreHub.Id)
+            return;
+        
+        BoxArea.OnMouseUp += HandleMouseUp;
     }
 
     private void SetupTimer()
@@ -217,19 +212,41 @@
         };
     }
     
-    public void SetPosition(float x, float y)
+    public void SetData(float x, float y, float velX, float velY, float hueDegrees, DateTime time)
     {
+        if (time < _lastReceived)
+            return;
+        
         _posX = x;
         _posY = y;
+        _velX = velX;
+        _velY = velY;
+        _hueDegrees = hueDegrees;
         
         StateHasChanged();
     }
-
-    private async void HandleNetworkTimerFire(object state)
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (CoreHub.Hub.State != HubConnectionState.Connected)
+        if (Id != CoreHub.Id)
             return;
         
-        await CoreHub.Hub.InvokeAsync("SendBallPosition", _posX, _posY);
+        if (CoreHub.Hub.State != HubConnectionState.Connected)
+            return;
+
+        if (DateTime.Now.Subtract(_lastNetworkUpdate).Milliseconds > 250)
+        {
+            await CoreHub.Hub.InvokeAsync(
+                "SendBallData", 
+                _posX, 
+                _posY,
+                _velX,
+                _velY,
+                _hueDegrees,
+                DateTime.Now
+            );
+            _lastNetworkUpdate = DateTime.Now;
+        }
     }
+
 }
